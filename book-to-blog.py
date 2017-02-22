@@ -1,6 +1,13 @@
-from urllib import request
 import json
 import os
+from urllib import request
+from datetime import datetime
+
+n = datetime.now()
+if n.month < 10:
+    nowtime = str(n.year) + " 0" + str(n.month)
+else:
+    nowtime = str(n.year) + " " + str(n.month)
 
 while 1:
     booklistpath = input("Input path to booklist:")
@@ -11,14 +18,19 @@ while 1:
         isbnlist = isbns.split('<br>')
         for isbn in isbnlist:
             try:
-                w = request.urlopen("https://api.douban.com/v2/book/isbn/" + isbn)
+                w = request.urlopen(
+                    "https://api.douban.com/v2/book/isbn/" + isbn)
                 s = w.read()
                 s = s.decode("utf-8")
                 js = json.loads(s)
-                author = js['author'].length() > 1 ? js['author'][0] + "等" : js['author'][0]
-                result.push("!["+ js['title'] + " "+ js['author'] + "](" + js['alt'] + ")")
+                if len(js['author']) > 1:
+                    author = js['author'][0] + "等"
+                else:
+                    author = js['author'][0]
+                result.append("[" + nowtime + "  " + js['title'] + "  " +
+                              author + "](" + js['alt'] + ")")
             except BaseException as e:
-                print("Error occured when processing: " + isbn + "\n")
+                print("Error occured when processing: " + isbn)
                 print(e)
     except BaseException as e:
         print("Path to Booklist is invalid: " + e)
@@ -26,11 +38,14 @@ while 1:
         if f:
             f.close()
     try:
-        fout = open(os.path.splitext(booklistpath)[0] + ".md", "w")
-        k = result.join("\n")
-        fout.write(k)
+        fout = open(os.path.splitext(booklistpath)[0] + ".md", "wb")
+        k = "\n".join(result)
+        print(k)
+        fout.write(k.encode("utf-8"))
     except BaseException as e:
-        print("Error occured when creating output file(" + os.path.splitext(booklistpath)[0] + ".md" + ")" + ":" + e)
+        print("Error occured when creating output file(" +
+              os.path.splitext(booklistpath)[0] + ".md" + ")")
+        print(e)
     finally:
         if fout:
-            fout.close
+            fout.close()
