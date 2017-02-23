@@ -1,13 +1,15 @@
+# coding=utf-8
+
 import json
 import os
-from urllib import request
 from datetime import datetime
+from urllib import request
 
 n = datetime.now()
 if n.month < 10:
-    nowtime = str(n.year) + " 0" + str(n.month)
+    nowtime = str(n.year) + ".0" + str(n.month)
 else:
-    nowtime = str(n.year) + " " + str(n.month)
+    nowtime = str(n.year) + "." + str(n.month)
 
 while 1:
     booklistpath = input("Input path to booklist:")
@@ -27,7 +29,7 @@ while 1:
                     author = js['author'][0] + "等"
                 else:
                     author = js['author'][0]
-                result.append("[" + nowtime + "  " + js['title'] + "  " +
+                result.append("- [" + nowtime + "  " + js['title'] + "  " +
                               author + "](" + js['alt'] + ")")
             except BaseException as e:
                 print("Error occured when processing: " + isbn)
@@ -40,7 +42,7 @@ while 1:
     try:
         fout = open(os.path.splitext(booklistpath)[0] + ".md", "wb")
         k = "\n".join(result)
-        print(k)
+        #print(k)
         fout.write(k.encode("utf-8"))
     except BaseException as e:
         print("Error occured when creating output file(" +
